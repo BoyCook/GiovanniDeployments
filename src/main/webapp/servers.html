@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Deployments Dashboard - Servers</title>
+    <link type="text/css" href="css/redmond/jquery-ui-1.8.2.custom.css" rel="Stylesheet"/>
+    <link type="text/css" href="css/default.css" rel="Stylesheet"/>
+    <link type="text/css" href="js/lib/jquery.hintbox.css" rel="Stylesheet"/>
+    <script type="text/javascript" src="js/lib/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript" src="js/lib/jquery-ui-1.8.16.min.js"></script>
+    <script type="text/javascript" src="js/lib/sarissa-compressed.js"></script>
+    <script type="text/javascript" src="js/lib/jsMap.js"></script>
+    <script type="text/javascript" src="js/lib/http.utils.js"></script>
+    <script type="text/javascript" src="js/lib/jsXslt.js"></script>
+    <script type="text/javascript" src="js/lib/jquery.xslTransform.js"></script>
+    <script type="text/javascript" src="js/lib/jquery.collapsible.js"></script>
+    <script type="text/javascript" src="js/lib/jquery.hintbox.js"></script>
+    <script type="text/javascript" src="js/default.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            setupServers();
+        });
+        function getBaseUrl() {
+            return window.location.protocol + '//' + window.location.host + '/deployments/service/';
+        }
+    </script>
+</head>
+<body>
+
+<div id="head">
+    <input type="button" id="butExpandAll" value="Expand All" />
+    <input type="button" id="butCollapseAll" value="Collapse All" />
+</div>
+
+<div id="content">
+    <h1>Indexing, please wait...</h1>
+</div>
+
+<div id="loading" title="Please wait...">
+    <img src="images/" alt="Loading..."/>
+</div>
+
+</body>
+</html>

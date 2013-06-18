@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Deployments Dashboard - Servers</title>
+    <link type="text/css" href="css/redmond/jquery-ui-1.8.2.custom.css" rel="Stylesheet"/>
+    <link type="text/css" href="css/default.css" rel="Stylesheet"/>
+    <script type="text/javascript" src="js/lib/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript" src="js/lib/jquery-ui-1.8.16.min.js"></script>
+    <script type="text/javascript" src="js/lib/sarissa-compressed.js"></script>
+    <script type="text/javascript" src="js/lib/jsMap.js"></script>
+    <script type="text/javascript" src="js/lib/http.utils.js"></script>
+    <script type="text/javascript" src="js/lib/jsXslt.js"></script>
+    <script type="text/javascript" src="js/lib/jquery.xslTransform.js"></script>
+    <script type="text/javascript" src="js/default.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            uiBinding();
+        });
+        function getBaseUrl() {
+            return window.location.protocol + '//' + window.location.host + '/deployments/service/';
+        }
+        function getParams() {
+            var hashs = document.location.hash.substring(1).split(',');
+            var params = [];
+            for (var i = 0; i < hashs.length; i++) {
+                var item = hashs[i].split('=');
+                params[item[0]] = item[1];
+            }
+        }
+        function uiBinding() {
+            $('#loading').dialog();
+            var id = document.location.hash.substring(1);
+            $('#content').xslt({
+                xslUrl: 'xsl/app.xsl',
+                xmlUrl: 'service/servers/' + id + '/'
+            });
+        }
+    </script>
+</head>
+<body>
+
+<div id="content">
+
+</div>
+
+<div id="loading" title="Please wait...">
+    <img src="images/" alt="Loading..."/>
+</div>
+
+</body>
+</html>

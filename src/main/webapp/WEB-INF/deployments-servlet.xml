@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-2.5.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+
+    <!-- Package to find the Controller classes-->
+    <context:component-scan base-package="org.cccs.deployments.web"/>
+
+    <!-- Enable annotation based mapping. This is where the DispatcherServlet hands control to -->
+    <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" primary="false"/>
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/>
+
+    <!--SimpleUrlHandlerMapping-->
+    <bean id="handlerMapping"
+          class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+    </bean>
+
+    <!--BeanNameUrlHandlerMapping-->
+    <!-- TODO: look at Handler Interceptors-->
+
+    <!-- Set view resolvers. This is the view that is to be returned-->
+    <!-- Re-direct *.jsp to /jsp/*.jsp -->
+    <bean id="urlViewResolver"
+          class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- Re-direct *.html to /html/*.html -->
+    <bean id="simpleViewResolver"
+          class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/html/"/>
+        <property name="suffix" value=".html"/>
+    </bean>
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+        <property name="mediaTypes">
+            <map>
+                <entry key="xml" value="application/xml"/>
+                <entry key="xls" value="application/vnd.ms-excel"/>
+                <entry key="zip" value="application/zip"/>
+            </map>
+        </property>
+        <property name="viewResolvers">
+            <list>
+                <bean class="org.springframework.web.servlet.view.BeanNameViewResolver"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Hook the marshaller into the view -->
+    <bean id="marshallingView"
+          class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <property name="modelKey" value="domain-data"/>
+        <property name="marshaller" ref="responseMarshaller"/>
+    </bean>
+
+    <!-- XStream marshaller for oxm -->
+    <bean id="responseMarshaller"
+          class="org.springframework.oxm.xstream.XStreamMarshaller">
+        <property name="aliases">
+            <props>
+                <prop key="project">org.cccs.deployments.domain.Project</prop>
+                <prop key="index">org.cccs.deployments.domain.SVNIndex</prop>
+                <prop key="db">org.cccs.deployments.domain.DBServer</prop>
+                <prop key="server">org.cccs.deployments.domain.Server</prop>
+                <prop key="stage">org.cccs.deployments.domain.Stage</prop>
+                <prop key="resources">java.util.List</prop>
+                <prop key="resource">org.cccs.wadlgenerator.domain.Resource</prop>
+                <prop key="application">org.cccs.wadlgenerator.domain.Resources</prop>
+            </props>
+        </property>
+        <property name="converters">
+            <list>
+                <bean class="org.cccs.deployments.integration.oxm.ProjectConverter"/>
+                <bean class="org.cccs.deployments.integration.oxm.ServerConverter"/>
+                <bean class="org.cccs.deployments.integration.oxm.DBServerConverter"/>
+                <bean class="org.cccs.deployments.integration.oxm.SVNIndexConverter"/>
+                <bean class="org.cccs.wadlgenerator.converters.ResourceConverter"/>
+                <bean class="org.cccs.wadlgenerator.converters.ResourcesConverter"/>
+            </list>
+        </property>
+        <property name="mode" value="1001"/>
+    </bean>
+</beans>
+        

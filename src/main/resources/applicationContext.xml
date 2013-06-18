@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-2.5.xsd
+        http://www.springframework.org/schema/jee
+        http://www.springframework.org/schema/jee/spring-jee-2.5.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+    <context:property-placeholder location="classpath:*.properties"/>
+
+    <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
+
+    <bean id="dataService"
+          scope="prototype"
+          class="org.cccs.deployments.service.DataService">
+        <property name="svn" ref="svnProvider"/>
+        <property name="indexProvider" ref="indexProvider"/>
+    </bean>
+
+    <bean id="indexProvider"
+          scope="prototype"
+          class="${index.provider.class}">
+        <constructor-arg index="0" value="${index.root}"/>
+        <constructor-arg index="1" value="${index.query}"/>
+        <constructor-arg index="2" ref="marshal"/>
+    </bean>
+
+    <bean id="svnProvider"
+          scope="prototype"
+          class="org.cccs.deployments.provider.SubversionProvider">
+        <constructor-arg index="0" value="${subversion.repository.url}"/>
+        <constructor-arg index="1" value="${subversion.user.name}"/>
+        <constructor-arg index="2" value="${subversion.password}"/>
+    </bean>
+
+    <bean id="svnIndexJob" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="org.cccs.deployments.service.CronService"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="dataService" value-ref="dataService"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="marshal"
+            class="org.cccs.deployments.integration.oxm.Marshal">
+        <constructor-arg index="0" ref="marshaller"/>
+    </bean>
+
+    <bean id="marshaller"
+          class="org.springframework.oxm.xstream.XStreamMarshaller">
+        <property name="aliases">
+            <props>
+                <prop key="project">org.cccs.deployments.domain.Project</prop>
+                <prop key="index">org.cccs.deployments.domain.SVNIndex</prop>
+                <prop key="row">org.cccs.deployments.domain.SVNIndex</prop>
+                <prop key="db">org.cccs.deployments.domain.DBServer</prop>
+                <prop key="server">org.cccs.deployments.domain.Server</prop>
+                <prop key="stage">org.cccs.deployments.domain.Stage</prop>
+                <prop key="resources">java.util.List</prop>
+                <prop key="response">java.util.List</prop>
+            </props>
+        </property>
+        <property name="converters">
+            <list>
+                <bean class="org.cccs.deployments.integration.oxm.ProjectConverter"/>
+                <bean class="org.cccs.deployments.integration.oxm.ServerConverter"/>
+                <bean class="org.cccs.deployments.integration.oxm.DBServerConverter"/>
+                <bean class="org.cccs.deployments.integration.oxm.SVNIndexConverter"/>
+            </list>
+        </property>
+        <property name="mode" value="1001"/>
+    </bean>
+
+    <!-- SimpleTrigger job for application startup -->
+    <bean id="startTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+        <property name="jobDetail" ref="svnIndexJob"/>
+        <property name="startDelay" value="1000"/>
+        <!--<property name="repeatInterval" value="300000"/>-->
+        <property name="repeatInterval" value="1200000"/>
+        <!-- Every Twenty Minutes-->
+    </bean>
+    <!-- Start the configured job -->
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="startTrigger"/>
+            </list>
+        </property>
+    </bean>
+</beans>
